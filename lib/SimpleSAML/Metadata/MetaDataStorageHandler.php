@@ -150,7 +150,7 @@ class SimpleSAML_Metadata_MetaDataStorageHandler
                 if (array_key_exists('expire', $le)) {
                     if ($le['expire'] < time()) {
                         unset($srcList[$key]);
-                        SimpleSAML_Logger::warning(
+                        SimpleSAML\Logger::warning(
                             "Dropping metadata entity ".var_export($key, true).", expired ".
                             SimpleSAML\Utils\Time::generateTimestamp($le['expire'])."."
                         );
@@ -208,10 +208,6 @@ class SimpleSAML_Metadata_MetaDataStorageHandler
 
         // then we look for the hostname
         $currenthost = \SimpleSAML\Utils\HTTP::getSelfHost(); // sp.example.org
-        if (strpos($currenthost, ":") !== false) {
-            $currenthostdecomposed = explode(":", $currenthost);
-            $currenthost = $currenthostdecomposed[0];
-        }
 
         foreach ($this->sources as $source) {
             $index = $source->getEntityIdFromHostPath($currenthost, $set, $type);

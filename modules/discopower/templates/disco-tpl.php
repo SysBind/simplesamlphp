@@ -18,10 +18,10 @@ if(!array_key_exists('header', $this->data)) {
 $this->data['header'] = $this->t($this->data['header']);
 $this->data['jquery'] = array('core' => TRUE, 'ui' => TRUE, 'css' => TRUE);
 
-$this->data['head'] = '<link rel="stylesheet" media="screen" type="text/css" href="' . SimpleSAML_Module::getModuleUrl('discopower/style.css')  . '" />';
+$this->data['head'] = '<link rel="stylesheet" media="screen" type="text/css" href="' . SimpleSAML\Module::getModuleUrl('discopower/style.css')  . '" />';
 
-$this->data['head'] .= '<script type="text/javascript" src="' . SimpleSAML_Module::getModuleUrl('discopower/js/jquery.livesearch.js')  . '"></script>';
-$this->data['head'] .= '<script type="text/javascript" src="' . SimpleSAML_Module::getModuleUrl('discopower/js/' . $this->data['score'] . '.js')  . '"></script>';
+$this->data['head'] .= '<script type="text/javascript" src="' . SimpleSAML\Module::getModuleUrl('discopower/js/jquery.livesearch.js')  . '"></script>';
+$this->data['head'] .= '<script type="text/javascript" src="' . SimpleSAML\Module::getModuleUrl('discopower/js/' . $this->data['score'] . '.js')  . '"></script>';
 
 $this->data['head'] .= '<script type="text/javascript">
 
@@ -84,13 +84,13 @@ function getTranslatedName($t, $metadata) {
 		$displayName = $metadata['UIInfo']['DisplayName'];
 		assert('is_array($displayName)'); // Should always be an array of language code -> translation
 		if (!empty($displayName)) {
-			return $t->getTranslation($displayName);
+			return $t->getTranslator()->getPreferredTranslation($displayName);
 		}
 	}
 
 	if (array_key_exists('name', $metadata)) {
 		if (is_array($metadata['name'])) {
-			return $t->getTranslation($metadata['name']);
+			return $t->getTranslator()->getPreferredTranslation($metadata['name']);
 		} else {
 			return $metadata['name'];
 		}

@@ -64,10 +64,10 @@ if ($this->data['errorcode'] !== null) {
                            name="remember_username" value="Yes"/>
                     <small><?php echo $this->t('{login:remember_username}'); ?></small>
                 </td>
-            </tr>
             <?php
             }
             ?>
+            </tr>
             <tr>
                 <td><label for="password"><?php echo $this->t('{login:password}'); ?></label></td>
                 <td>
@@ -83,9 +83,11 @@ if ($this->data['errorcode'] !== null) {
                            name="remember_me" value="Yes"/>
                     <small><?php echo $this->t('{login:remember_me}'); ?></small>
                 </td>
-            </tr>
             <?php
             }
+            ?>
+            </tr>
+            <?php
             if (array_key_exists('organizations', $this->data)) {
                 ?>
                 <tr>
@@ -122,7 +124,7 @@ if ($this->data['errorcode'] !== null) {
                 <td></td><td></td>
                 <td>
                     <button id="regularsubmit" class="btn"
-                            onclick="this.value='<?php echo $this->t('{login:processing'); ?>';
+                            onclick="this.value='<?php echo $this->t('{login:processing}'); ?>';
                                 this.disabled=true; this.form.submit(); return true;" tabindex="6">
                         <?php echo $this->t('{login:login_button}'); ?>
                     </button>

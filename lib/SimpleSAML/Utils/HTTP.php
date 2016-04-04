@@ -1,6 +1,8 @@
 <?php
 namespace SimpleSAML\Utils;
 
+use SimpleSAML\Module;
+use SimpleSAML\Logger;
 
 /**
  * HTTP-related utility methods.
@@ -28,7 +30,7 @@ class HTTP
         // encrypt the session ID and the random ID
         $info = base64_encode(Crypto::aesEncrypt($session->getSessionId().':'.$id));
 
-        $url = \SimpleSAML_Module::getModuleURL('core/postredirect.php', array('RedirInfo' => $info));
+        $url = Module::getModuleURL('core/postredirect.php', array('RedirInfo' => $info));
         return preg_replace('#^https:#', 'http:', $url);
     }
 
@@ -157,7 +159,7 @@ class HTTP
         }
 
         if (strlen($url) > 2048) {
-            \SimpleSAML_Logger::warning('Redirecting to a URL longer than 2048 bytes.');
+            Logger::warning('Redirecting to a URL longer than 2048 bytes.');
         }
 
         // set the location header
@@ -282,7 +284,7 @@ class HTTP
 
         // we didn't have a session cookie. Redirect to the no-cookie page
 
-        $url = \SimpleSAML_Module::getModuleURL('core/no_cookie.php');
+        $url = Module::getModuleURL('core/no_cookie.php');
         if ($retryURL !== null) {
             $url = self::addURLParameters($url, array('retryURL' => $retryURL));
         }
@@ -323,7 +325,7 @@ class HTTP
             $hostname = $matches[1];
 
             // add self host to the white list
-            $self_host = self::getSelfHost();
+            $self_host = self::getSelfHostWithNonStandardPort();
             $trustedSites[] = $self_host;
 
             // throw exception due to redirection to untrusted site
@@ -336,7 +338,7 @@ class HTTP
 
 
     /**
-     * Helper function to retrieve a file or URL with proxy support, also 
+     * Helper function to retrieve a file or URL with proxy support, also
      * supporting proxy basic authorization..
      *
      * An exception will be thrown if we are unable to retrieve the data.
@@ -393,7 +395,7 @@ class HTTP
                         'SNI_enabled'     => true,
                     );
                 } else {
-                    \SimpleSAML_Logger::warning('Invalid URL format or local URL used through a proxy');
+                    Logger::warning('Invalid URL format or local URL used through a proxy');
                 }
             }
         }
@@ -532,10 +534,10 @@ class HTTP
 
             return $protocol.$hostname.$port.$path;
         } else {
-            throw new \SimpleSAML_Error_Exception('Invalid value for \'baseurlpath\' in '.
-                'config.php. Valid format is in the form: '.
-                '[(http|https)://(hostname|fqdn)[:port]]/[path/to/simplesaml/]. '.
-                'It must end with a \'/\'.');
+            throw new \SimpleSAML_Error_Exception(
+                'Invalid value for \'baseurlpath\' in config.php. Valid format is in the form: '.
+                '[(http|https)://(hostname|fqdn)[:port]]/[path/to/simplesaml/]. It must end with a \'/\'.'
+            );
         }
     }
 
@@ -585,7 +587,7 @@ class HTTP
         } else { // post the data directly
             $session = \SimpleSAML_Session::getSessionFromRequest();
             $id = self::savePOSTData($session, $destination, $data);
-            $url = \SimpleSAML_Module::getModuleURL('core/postredirect.php', array('RedirId' => $id));
+            $url = Module::getModuleURL('core/postredirect.php', array('RedirId' => $id));
         }
 
         return $url;
@@ -595,21 +597,39 @@ class HTTP
     /**
      * Retrieve our own host.
      *
-     * @return string The current host (with non-default ports included).
+     * E.g. www.example.com
+     *
+     * @return string The current host.
+     *
+     * @author Jaime Perez, UNINETT AS <jaime.perez@uninett.no>
+     */
+    public static function getSelfHost()
+    {
+        $decomposed = explode(':', self::getSelfHostWithNonStandardPort());
+        return array_shift($decomposed);
+    }
+
+    /**
+     * Retrieve our own host, including the port in case the it is not standard for the protocol in use. That is port
+     * 80 for HTTP and port 443 for HTTPS.
+     *
+     * E.g. www.example.com:8080
+     *
+     * @return string The current host, followed by a colon and the port number, in case the port is not standard for
+     * the protocol.
      *
      * @author Andreas Solberg, UNINETT AS <andreas.solberg@uninett.no>
      * @author Olav Morken, UNINETT AS <olav.morken@uninett.no>
      */
-    public static function getSelfHost()
+    public static function getSelfHostWithNonStandardPort()
     {
         $url = self::getBaseURL();
 
         $start = strpos($url, '://') + 3;
-        $length = strcspn($url, '/:', $start);
+        $length = strcspn($url, '/', $start);
 
         return substr($url, $start, $length);
     }
-
 
     /**
      * Retrieve our own host together with the URL path. Please note this function will return the base URL for the
@@ -625,7 +645,7 @@ class HTTP
         $baseurl = explode("/", self::getBaseURL());
         $elements = array_slice($baseurl, 3 - count($baseurl), count($baseurl) - 4);
         $path = implode("/", $elements);
-        return self::getSelfHost()."/".$path;
+        return self::getSelfHostWithNonStandardPort()."/".$path;
     }
 
 
@@ -959,7 +979,7 @@ class HTTP
 
         // Do not set secure cookie if not on HTTPS
         if ($params['secure'] && !self::isHTTPS()) {
-            \SimpleSAML_Logger::warning('Setting secure cookie on plain HTTP is not allowed.');
+            Logger::warning('Setting secure cookie on plain HTTP is not allowed.');
             return;
         }
 
@@ -974,18 +994,32 @@ class HTTP
         }
 
         if ($params['raw']) {
-            $success = setrawcookie($name, $value, $expire, $params['path'], $params['domain'], $params['secure'],
-                $params['httponly']);
+            $success = setrawcookie(
+                $name,
+                $value,
+                $expire,
+                $params['path'],
+                $params['domain'],
+                $params['secure'],
+                $params['httponly']
+            );
         } else {
-            $success = setcookie($name, $value, $expire, $params['path'], $params['domain'], $params['secure'],
-                $params['httponly']);
+            $success = setcookie(
+                $name,
+                $value,
+                $expire,
+                $params['path'],
+                $params['domain'],
+                $params['secure'],
+                $params['httponly']
+            );
         }
 
         if (!$success) {
             if ($throw) {
                 throw new \SimpleSAML_Error_Exception('Error setting cookie: headers already sent.');
             } else {
-                \SimpleSAML_Logger::warning('Error setting cookie: headers already sent.');
+                Logger::warning('Error setting cookie: headers already sent.');
             }
         }
     }
