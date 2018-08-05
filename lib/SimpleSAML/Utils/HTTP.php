@@ -1219,6 +1219,7 @@ class HTTP
         $p = new \SimpleSAML_XHTML_Template($config, 'post.php');
         $p->data['destination'] = $destination;
         $p->data['post'] = $data;
+        $p->data['baseurlpath'] = $config->getValue('baseurlpath');
         $p->show();
         exit(0);
     }

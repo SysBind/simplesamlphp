@@ -4,22 +4,22 @@
 <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
     <title>POST data</title>
-    <script type="text/javascript" src="/<?php echo $this->data['baseurlpath']; ?>resources/post.js"></script>
-    <link 
-        type="text/css" rel="stylesheet" href="/<?php echo $this->data['baseurlpath']; ?>resources/post.css" />
+    <script type="text/javascript" src="<?php echo $this->data['baseurlpath']; ?>resources/post.js"></script>
+    <link
+        type="text/css" rel="stylesheet" href="<?php echo $this->data['baseurlpath']; ?>resources/post.css" />
 </head>
 <body>
 
     <noscript>
-        <p><strong>Note:</strong> 
-        Since your browser does not support JavaScript, 
-        you must press the button below once to proceed.</p> 
-    </noscript> 
+        <p><strong>Note:</strong>
+        Since your browser does not support JavaScript,
+        you must press the button below once to proceed.</p>
+    </noscript>
 
-    <form method="post" 
+    <form method="post"
         action="<?php echo htmlspecialchars($this->data['destination']); ?>">
-    <!-- Need to add this element and call click method, because calling 
-    submit() on the form causes failed submission if the form has another 
+    <!-- Need to add this element and call click method, because calling
+    submit() on the form causes failed submission if the form has another
     element with name or id of submit.
     See: https://developer.mozilla.org/en/DOM/form.submit#Specification -->
     <input type="submit" id="postLoginSubmitButton"/>
@@ -51,8 +51,8 @@ function printItem($name, $value) {
     assert('is_string($name)');
     assert('is_string($value) || is_array($value)');
     if (is_string($value)) {
-        echo '<input type="hidden" name="' . 
-            htmlspecialchars($name) . '" value="' . 
+        echo '<input type="hidden" name="' .
+            htmlspecialchars($name) . '" value="' .
             htmlspecialchars($value) . '" />';
         return;
     }
